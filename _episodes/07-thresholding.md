@@ -57,16 +57,16 @@ rest of the pixels "off," by setting their color channel values to zeros. The
 skimage library has several different methods of thresholding. We will start 
 with the simplest version, which involves an important step of human 
 input. Specifically, in this simple, *fixed-level thresholding*, we have to 
-provide a threshold value, `T`. 
+provide a threshold value, `t`. 
 
 The process works like this. First, we will load the original image, convert
 it to grayscale, and blur it with one of the methods from the 
 [Blurring]({{ page.root }}/06-blurring/) episode. Then, we will use the 
-`>` operator to apply the threshold T, an integer in the closed range [0, 255].
+`>` operator to apply the threshold `t`, a number in the closed range [0.0, 1.0].
 Pixels with color values on one 
-side of `T` will be turned "on," while pixels with color values on the other side
+side of `t` will be turned "on," while pixels with color values on the other side
 will be turned "off." In order to use this function, we have to determine a good 
-value for `T`. How might we do that? Well, one way is to look at a grayscale 
+value for `t`. How might we do that? Well, one way is to look at a grayscale 
 histogram of the image. Here is the histogram produced by the 
 **GrayscaleHistogram.py** program from the 
 [Creating Histograms]({{ page.root }}/05-creating-histograms/) episode, if we
@@ -76,11 +76,10 @@ run it on the colored shapes image shown above.
 
 Since the image has a white background, most of the pixels in the image are 
 white. This corresponds nicely to what we see in the histogram: there is a 
-spike just past the value 250. If we want to select the shapes and not the 
+spike near the value of 1.0. If we want to select the shapes and not the 
 background, we want to turn off the white background pixels, while leaving the
 pixels for the shapes turned on. So, we should choose a value of `T` somewhere 
-between 200 and 255, and turn pixels
-below the `T` value on and turn the pixels above the `T` value off. 
+before the large peak and turn pixels above that value "off".
 
 Here are the first few lines of a Python program to apply simple thresholding to the image, to 
 accomplish this task. 
@@ -89,7 +88,7 @@ accomplish this task.
 """
  * Python script to demonstrate simple thresholding.
  *
- * usage: python Threshold.py <filename> <kernel-size>  <threshold>
+ * usage: python Threshold.py <filename> <sigma>  <threshold>
 """
 import sys
 import numpy as np
@@ -97,11 +96,12 @@ import skimage.color
 import skimage.filters
 import skimage.io
 import skimage.viewer
+import skimage.util.dtype
 
-# get filename, kernel size, and threshold value from command line
+# get filename, sigma, and threshold value from command line
 filename = sys.argv[1]
-k = int(sys.argv[2])
-t = int(sys.argv[3])
+sigma = float(sys.argv[2])
+t = float(sys.argv[3])
 
 # read and display the original image
 image = skimage.io.imread(fname=filename)
@@ -137,16 +137,16 @@ The fixed-level thresholding is performed using numpy comparison operators.
 
 ~~~
 # perform inverse binary thresholding
-mask = blur < t
+mask = blur < t_rescaled
 ~~~
 {: .python}
 
 Here, we want to turn "on" all pixels which have values smaller than the threshold, 
 so we use the `less operator <` to compare the blurred image `blur` to the threshold `t`. 
-The operator reurns a binary image, that we capture in the variable `mask`.
+The operator returns a binary image, that we capture in the variable `mask`.
 It has only one channel, and each of its values is either 0 or 1. Here is a 
 visualization of the binary image created by the thresholding operation.
-The program used parameters of k = 7 and T = 210 to produce this image. You can
+The program used parameters of `sigma = 2` and `t = 0.8` to produce this image. You can
 see that the areas where the shapes were in the original area are now white, 
 while the rest of the mask image is black. 
 

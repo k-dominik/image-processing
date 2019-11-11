@@ -9,6 +9,7 @@ import skimage.color
 import skimage.io
 import skimage.filters
 import skimage.viewer
+import skimage.util.dtype
 
 # get filename, kernel size, and threshold value from command line
 filename = sys.argv[1]
